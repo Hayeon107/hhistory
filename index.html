@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#102b36" />
+    <title>H₂ Station | 충전소 이력 관리</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="#" aria-label="홈">
+          <span class="brand-mark">H₂</span
+          ><span><strong>STATION</strong><small>OPERATIONS HUB</small></span>
+        </a>
+        <div class="nav-label">WORKSPACE</div>
+        <button class="nav-item active" id="navStations">
+          <span class="nav-icon">▦</span> 충전소 관리
+          <span class="nav-count" id="navCount">12</span>
+        </button>
+        <button class="nav-item" id="navHistory">
+          <span class="nav-icon">◷</span> 전체 이력
+        </button>
+        <div class="sidebar-bottom">
+          <div class="help-card">
+            <span class="help-icon">✦</span><strong>데이터 관리 안내</strong>
+            <p>
+              현재 데이터는 브라우저에 저장됩니다. 서버 연결 전 테스트용으로
+              사용하세요.
+            </p>
+          </div>
+          <div class="profile">
+            <div class="avatar">관리</div>
+            <div>
+              <strong>운영 관리자</strong><small>Station workspace</small>
+            </div>
+            <span class="profile-dot"></span>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <button class="mobile-menu" id="mobileMenu" aria-label="메뉴 열기">
+            ☰
+          </button>
+          <div class="breadcrumbs">
+            워크스페이스 <span>/</span>
+            <strong id="breadcrumbCurrent">충전소 관리</strong>
+          </div>
+          <div class="topbar-right">
+            <span class="local-badge"><i></i> 로컬 데모 모드</span
+            ><button
+              class="icon-button"
+              id="exportTop"
+              title="이력 CSV 내보내기"
+            >
+              ⇩
+            </button>
+          </div>
+        </header>
+
+        <section class="page-heading">
+          <div>
+            <div class="eyebrow">HYDROGEN INFRASTRUCTURE</div>
+            <h1 id="pageTitle">충전소 관리</h1>
+            <p id="pageSubtitle">
+              충전소 정보를 검색하고 과거 이력을 한곳에서 관리하세요.
+            </p>
+          </div>
+          <div class="heading-actions">
+            <button class="btn btn-secondary" id="importButton">
+              ⇧ <span>CSV 가져오기</span></button
+            ><input
+              type="file"
+              id="importFile"
+              accept=".xlsx,.xls"
+              hidden
+            /><button class="btn btn-primary" id="addHistoryTop">
+              ＋ <span>새 이력 등록</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="stats-grid" id="statsGrid">
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>등록 충전소</span><span class="stat-icon blue">▦</span>
+            </div>
+            <div class="stat-value" id="statStations">12</div>
+            <div class="stat-foot">관리 중인 전체 충전소</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>누적 이력</span><span class="stat-icon teal">◷</span>
+            </div>
+            <div class="stat-value" id="statHistory">38</div>
+            <div class="stat-foot">등록된 전체 기록</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>이번 달 이력</span><span class="stat-icon violet">↗</span>
+            </div>
+            <div class="stat-value" id="statMonth">8</div>
+            <div class="stat-foot">이번 달 신규 등록 기록</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top">
+              <span>최근 기록</span><span class="stat-icon amber">◷</span>
+            </div>
+            <div class="stat-value stat-date" id="statLatest">오늘</div>
+            <div class="stat-foot">가장 최근에 등록된 이력</div>
+          </article>
+        </section>
+
+        <section class="workspace" id="stationWorkspace">
+          <div class="station-pane panel">
+            <div class="panel-heading">
+              <div>
+                <h2>
+                  충전소 목록
+                  <span class="muted-count" id="resultCount">12</span>
+                </h2>
+                <p>충전소를 선택해 상세 이력을 확인하세요.</p>
+              </div>
+              <button
+                class="small-icon-button"
+                id="clearSearch"
+                title="검색 초기화"
+              >
+                ↺
+              </button>
+            </div>
+            <label class="search-box"
+              ><span>⌕</span
+              ><input
+                id="stationSearch"
+                type="search"
+                placeholder="충전소명, 주소, 업소번호, IP 등 검색"
+                autocomplete="off"
+              /><kbd>검색</kbd></label
+            >
+            <div class="filter-row">
+              <span>빠른 필터</span
+              ><button class="filter-chip active" data-filter="all">전체</button
+              ><button class="filter-chip" data-filter="history">
+                이력 있음</button
+              ><button class="filter-chip" data-filter="recent">
+                최근 이력
+              </button>
+            </div>
+            <div class="station-list" id="stationList" aria-live="polite"></div>
+            <div class="list-footer" id="listFooter">
+              충전소 정보를 불러왔습니다.
+            </div>
+          </div>
+        </section>
+
+        <section class="panel all-history-panel hidden" id="allHistoryPanel">
+          <div class="panel-heading">
+            <div>
+              <h2>
+                전체 이력
+                <span class="muted-count" id="allHistoryCount">0</span>
+              </h2>
+              <p>모든 충전소의 이력을 최신순으로 확인합니다.</p>
+            </div>
+            <button class="btn btn-secondary" id="exportHistory">
+              ⇩ CSV 내보내기
+            </button>
+          </div>
+          <label class="search-box history-search"
+            ><span>⌕</span
+            ><input
+              id="historySearch"
+              type="search"
+              placeholder="이력 내용, 충전소명, 업소번호 등 검색"
+          /></label>
+          <div id="allHistoryList" class="all-history-list"></div>
+        </section>
+        <footer class="app-footer">
+          H₂ Station <span>·</span> 충전소 운영 이력 관리
+          <span class="footer-right">DEMO VERSION 1.0</span>
+        </footer>
+      </main>
+    </div>
+
+    <div
+      class="modal-backdrop hidden"
+      id="stationHistoryModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="stationHistoryTitle"
+    >
+      <section class="modal station-history-modal">
+        <div class="modal-header">
+          <div>
+            <div class="eyebrow">STATION HISTORY</div>
+            <h2 id="stationHistoryTitle">충전소 이력</h2>
+            <p>기본정보와 과거 이력을 확인하고 새 기록을 추가하세요.</p>
+          </div>
+          <button
+            type="button"
+            class="close-button"
+            id="closeStationHistory"
+            aria-label="닫기"
+          >
+            ×
+          </button>
+        </div>
+        <div class="detail-pane" id="detailPane"></div>
+      </section>
+    </div>
+    <div
+      class="modal-backdrop hidden"
+      id="historyModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+    >
+      <form class="modal" id="historyForm">
+        <div class="modal-header">
+          <div>
+            <div class="eyebrow">HISTORY MANAGEMENT</div>
+            <h2 id="modalTitle">새 이력 등록</h2>
+            <p>충전소의 점검·통신·설비 관련 기록을 추가합니다.</p>
+          </div>
+          <button
+            type="button"
+            class="close-button"
+            id="closeModal"
+            aria-label="닫기"
+          >
+            ×
+          </button>
+        </div>
+        <div class="form-field">
+          <label for="historyStation">충전소 <em>*</em></label
+          ><select id="historyStation" required></select>
+        </div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="historyDate">발생일 <em>*</em></label
+            ><input type="date" id="historyDate" required />
+          </div>
+          <div class="form-field">
+            <label for="historyCategory">이력 유형</label
+            ><select id="historyCategory">
+              <option>점검</option>
+              <option>통신 장애</option>
+              <option>설비 정비</option>
+              <option>검사</option>
+              <option>운영 변경</option>
+              <option>기타</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="historyContent">이력 내용 <em>*</em></label
+          ><textarea
+            id="historyContent"
+            rows="5"
+            placeholder="예: SRP 통신 상태 확인, 연결 실패 원인 점검 및 조치 결과"
+            required
+            maxlength="3000"
+          ></textarea>
+          <div class="field-hint">
+            조치 내용과 결과를 구체적으로 기록하면 이후 이력 조회에 도움이
+            됩니다.
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="historyMemo"
+            >추가 메모 <span class="optional">선택</span></label
+          ><input
+            id="historyMemo"
+            type="text"
+            placeholder="담당자, 후속 조치 등"
+            maxlength="500"
+          />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancelModal">
+            취소</button
+          ><button type="submit" class="btn btn-primary">
+            이력 저장 <span>→</span>
+          </button>
+        </div>
+      </form>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
