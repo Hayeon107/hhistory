@@ -203,6 +203,44 @@ function closeStationHistory() {
 // ------------------------------
 
 function bindEvents() {
+  const sidebar = $("#sidebar");
+  const menuToggle = $("#menuToggle");
+  const sidebarOverlay = $("#sidebarOverlay");
+
+  function closeSidebar() {
+    sidebar.classList.remove("open");
+    sidebarOverlay.classList.remove("open");
+
+    menuToggle.setAttribute("aria-expanded", "false");
+    menuToggle.setAttribute("aria-label", "메뉴 열기");
+  }
+
+  function toggleSidebar() {
+    const isOpen = sidebar.classList.toggle("open");
+
+    sidebarOverlay.classList.toggle("open", isOpen);
+
+    menuToggle.setAttribute("aria-expanded", String(isOpen));
+    menuToggle.setAttribute("aria-label", isOpen ? "메뉴 닫기" : "메뉴 열기");
+  }
+
+  // 햄버거 버튼
+  menuToggle.addEventListener("click", toggleSidebar);
+
+  // 바깥쪽 배경 클릭
+  sidebarOverlay.addEventListener("click", closeSidebar);
+
+  // ESC 키로 닫기
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeSidebar();
+    }
+  });
+
+  // 메뉴를 선택하면 서랍 닫기
+  $("#navStations").addEventListener("click", closeSidebar);
+  $("#navHistory").addEventListener("click", closeSidebar);
+
   // 충전소 검색
   $("#stationSearch").addEventListener("input", refreshStationList);
 

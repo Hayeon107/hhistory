@@ -9,6 +9,8 @@
   </head>
   <body>
     <div class="app-shell">
+      <!-- 모바일 메뉴 바깥쪽을 누르면 닫히는 배경 -->
+      <div id="sidebarOverlay" class="sidebar-overlay"></div>
       <aside class="sidebar" id="sidebar">
         <a class="brand" href="#" aria-label="홈">
           <span class="brand-mark">H₂</span
@@ -42,7 +44,14 @@
 
       <main class="main-content">
         <header class="topbar">
-          <button class="mobile-menu" id="mobileMenu" aria-label="메뉴 열기">
+          <!-- 햄버거 버튼 -->
+          <button
+            id="menuToggle"
+            class="menu-toggle"
+            aria-label="메뉴 열기"
+            aria-expanded="false"
+            aria-controls="sidebar"
+          >
             ☰
           </button>
           <div class="breadcrumbs">

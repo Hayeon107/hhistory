@@ -102,8 +102,6 @@ button {
   font-weight: 700;
 }
 
-
-
 .nav-icon {
   font-size: 17px;
   width: 20px;
@@ -238,9 +236,29 @@ button {
   color: #536c74;
   font-size: 17px;
 }
-.mobile-menu {
+
+/* 햄버거 버튼: 모바일에서만 표시 */
+.menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #dce5e9;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #173743;
+  font-size: 20px;
+  cursor: pointer;
+  position: relative;
+  z-index: 1001;
+}
+
+/* 메뉴 바깥쪽 배경 */
+.sidebar-overlay {
   display: none;
 }
+
 .page-heading {
   display: flex;
   justify-content: space-between;
@@ -978,15 +996,95 @@ button {
   opacity: 1;
   transform: translate(-50%, 0);
 }
-@media (min-width: 1500px) {
-  .main-content {
-    padding-left: 44px;
-    padding-right: 44px;
+
+
+/* 좁은 웹 화면 + 태블릿 + 모바일 */
+@media (max-width: 1024px) {
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
-  .workspace {
-    grid-template-columns: minmax(340px, 0.82fr) minmax(500px, 1.45fr);
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+
+    width: min(280px, 85vw);
+    height: 100dvh;
+    overflow-y: auto;
+    z-index: 1003;
+
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay.open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 30, 40, 0.45);
+    z-index: 1002;
   }
 }
+
+
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: inline-flex;
+  }
+
+  /* 사이드바를 화면 왼쪽 바깥에 배치 */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(280px, 85vw);
+    height: 100dvh;
+    overflow-y: auto;
+    z-index: 1003;
+
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+
+  /* 메뉴가 열렸을 때 */
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* 메뉴 뒤의 어두운 배경 */
+  .sidebar-overlay.open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 30, 40, 0.45);
+    z-index: 1002;
+  }
+
+  /* 열려 있는 메뉴에서 현재 페이지 표시 */
+  .sidebar .nav-item.active {
+    background: #1b414b;
+    color: #ffffff;
+    font-weight: 700;
+  }
+}
+
+/* 움직임 최소화 설정을 사용하는 경우 */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
+  }
+}
+
 @media (max-width: 1100px) {
   .main-content {
     padding: 0 22px;
@@ -1113,30 +1211,30 @@ button {
     grid-template-columns: 74px minmax(0, 1fr);
     gap: 9px;
   }
-.all-history-row .row-station {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
+  .all-history-row .row-station {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 
-  max-width: 100%;
-  min-width: 0;
-  padding: 8px 10px;
-  box-sizing: border-box;
+    max-width: 100%;
+    min-width: 0;
+    padding: 8px 10px;
+    box-sizing: border-box;
 
-  font-size: 12px;
-  line-height: 1.5;
-  color: #43867e;
-  text-align: center;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #43867e;
+    text-align: center;
 
-  white-space: normal;
-  overflow-wrap: anywhere;
+    white-space: normal;
+    overflow-wrap: anywhere;
 
-  background: #ffffff;
-  border: 1px solid #dce5e9;
-  border-radius: 8px;
-  cursor: pointer;
-}
+    background: #ffffff;
+    border: 1px solid #dce5e9;
+    border-radius: 8px;
+    cursor: pointer;
+  }
   .footer-right {
     display: none;
   }
