@@ -2,16 +2,9 @@
 
 import { DemoRepository } from "./data/repository.js";
 
-import {
-  $,
-  todayISO,
-  fmtDate,
-} from "./utils/helpers.js";
+import { $, todayISO, fmtDate } from "./utils/helpers.js";
 
-import {
-  renderStats,
-  renderStations,
-} from "./views/stationView.js";
+import { renderStats, renderStations } from "./views/stationView.js";
 
 import {
   renderDetail,
@@ -30,10 +23,7 @@ import {
   setActiveView,
 } from "./state.js";
 
-import {
-  exportWorkbook,
-  importWorkbook,
-} from "./services/xlsxService.js";
+import { exportWorkbook, importWorkbook } from "./services/xlsxService.js";
 
 // ------------------------------
 // 공통 데이터 조회
@@ -66,6 +56,16 @@ function showToast(message) {
   toastTimer = setTimeout(() => {
     toast.classList.remove("show");
   }, 2600);
+}
+
+function updateActiveNav(view) {
+  document
+    .querySelector("#navStations")
+    .classList.toggle("active", view === "stations");
+
+  document
+    .querySelector("#navHistory")
+    .classList.toggle("active", view === "history");
 }
 
 // ------------------------------
@@ -106,9 +106,7 @@ function refreshDetail() {
     onExportHistory: (stationNo) => {
       exportWorkbook(
         {
-          stations: repo.stations.filter(
-            (item) => item.no === stationNo,
-          ),
+          stations: repo.stations.filter((item) => item.no === stationNo),
           history: historyFor(stationNo),
         },
         `history_${stationNo}.xlsx`,
@@ -150,6 +148,7 @@ function selectStation(no, showHistory = true) {
     return;
   }
 
+  
   setSelectedNo(no);
   setActiveView("stations");
 
@@ -165,24 +164,29 @@ function selectStation(no, showHistory = true) {
   refreshDetail();
 
   if (showHistory) {
-    openStationHistoryModal(
-      stationByNo(no)?.station_name || "충전소",
-    );
+    openStationHistoryModal(stationByNo(no)?.station_name || "충전소");
   }
 }
 
 function showAllHistory() {
   setActiveView("history");
 
-  $("#stationWorkspace").classList.add("hidden");
-  $("#allHistoryPanel").classList.remove("hidden");
+  updateActiveNav("history");
 
-  $("#breadcrumbCurrent").textContent = "전체 이력";
-  $("#pageTitle").textContent = "전체 이력";
-  $("#pageSubtitle").textContent =
+  document.querySelector("#stationWorkspace").classList.add("hidden");
+
+  document.querySelector("#allHistoryPanel").classList.remove("hidden");
+
+  document.querySelector("#breadcrumbCurrent").textContent = "전체 이력";
+  document.querySelector("#pageTitle").textContent = "전체 이력";
+  document.querySelector("#pageSubtitle").textContent =
     "모든 충전소의 기록을 최신순으로 검색하고 확인하세요.";
 
-  refreshAllHistory();
+  renderAllHistory({
+  history: repo.history,
+  stations: repo.stations,
+  onSelectStation: (no) => selectStation(no),
+});;
 }
 
 // ------------------------------
@@ -210,10 +214,7 @@ function closeStationHistory() {
 
 function bindEvents() {
   // 충전소 검색
-  $("#stationSearch").addEventListener(
-    "input",
-    refreshStationList,
-  );
+  $("#stationSearch").addEventListener("input", refreshStationList);
 
   $("#clearSearch").addEventListener("click", () => {
     $("#stationSearch").value = "";
@@ -235,10 +236,7 @@ function bindEvents() {
   });
 
   // 전체 이력 검색
-  $("#historySearch").addEventListener(
-    "input",
-    refreshAllHistory,
-  );
+  $("#historySearch").addEventListener("input", refreshAllHistory);
 
   // 화면 전환
   $("#navStations").addEventListener("click", () => {
@@ -250,10 +248,7 @@ function bindEvents() {
     renderAll();
   });
 
-  $("#navHistory").addEventListener(
-    "click",
-    showAllHistory,
-  );
+  $("#navHistory").addEventListener("click", showAllHistory);
 
   // 이력 추가
   $("#addHistoryTop").addEventListener("click", () => {
@@ -263,10 +258,7 @@ function bindEvents() {
   $("#closeModal").addEventListener("click", closeModal);
   $("#cancelModal").addEventListener("click", closeModal);
 
-  $("#closeStationHistory").addEventListener(
-    "click",
-    closeStationHistory,
-  );
+  $("#closeStationHistory").addEventListener("click", closeStationHistory);
 
   // 팝업 바깥쪽 클릭 시 닫기
   $("#historyModal").addEventListener("click", (event) => {
@@ -275,14 +267,11 @@ function bindEvents() {
     }
   });
 
-  $("#stationHistoryModal").addEventListener(
-    "click",
-    (event) => {
-      if (event.target === $("#stationHistoryModal")) {
-        closeStationHistory();
-      }
-    },
-  );
+  $("#stationHistoryModal").addEventListener("click", (event) => {
+    if (event.target === $("#stationHistoryModal")) {
+      closeStationHistory();
+    }
+  });
 
   // ESC 키로 팝업 닫기
   document.addEventListener("keydown", (event) => {
@@ -340,49 +329,44 @@ function bindEvents() {
   });
 
   // 이력 등록
-  $("#historyForm").addEventListener(
-    "submit",
-    async (event) => {
-      event.preventDefault();
+  $("#historyForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-      const no = $("#historyStation").value;
-      const content = $("#historyContent").value.trim();
+    const no = $("#historyStation").value;
+    const content = $("#historyContent").value.trim();
 
-      if (!no || !content) {
-        showToast("충전소와 이력 내용을 입력해 주세요.");
-        return;
+    if (!no || !content) {
+      showToast("충전소와 이력 내용을 입력해 주세요.");
+      return;
+    }
+
+    const record = {
+      history_id: `H-${Date.now()}`,
+      no,
+      date: $("#historyDate").value || todayISO(),
+      category: $("#historyCategory").value || "기타",
+      content,
+      memo: $("#historyMemo").value.trim(),
+    };
+
+    try {
+      await repo.addHistory(record);
+
+      setSelectedNo(no);
+      closeModal();
+
+      renderAll();
+
+      if (!$("#stationHistoryModal").classList.contains("hidden")) {
+        openStationHistoryModal(stationByNo(no)?.station_name || "충전소");
       }
 
-      const record = {
-        history_id: `H-${Date.now()}`,
-        no,
-        date: $("#historyDate").value || todayISO(),
-        category: $("#historyCategory").value || "기타",
-        content,
-        memo: $("#historyMemo").value.trim(),
-      };
-
-      try {
-        await repo.addHistory(record);
-
-        setSelectedNo(no);
-        closeModal();
-
-        renderAll();
-
-        if (!$("#stationHistoryModal").classList.contains("hidden")) {
-          openStationHistoryModal(
-            stationByNo(no)?.station_name || "충전소",
-          );
-        }
-
-        showToast("새 이력이 등록되었습니다.");
-      } catch (error) {
-        console.error(error);
-        showToast("이력 등록에 실패했습니다.");
-      }
-    },
-  );
+      showToast("새 이력이 등록되었습니다.");
+    } catch (error) {
+      console.error(error);
+      showToast("이력 등록에 실패했습니다.");
+    }
+  });
 }
 
 // ------------------------------
