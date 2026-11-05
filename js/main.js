@@ -59,13 +59,9 @@ function showToast(message) {
 }
 
 function updateActiveNav(view) {
-  document
-    .querySelector("#navStations")
-    .classList.toggle("active", view === "stations");
+  $("#navStations").classList.toggle("active", view === "stations");
 
-  document
-    .querySelector("#navHistory")
-    .classList.toggle("active", view === "history");
+  $("#navHistory").classList.toggle("active", view === "history");
 }
 
 // ------------------------------
@@ -121,7 +117,7 @@ function refreshAllHistory() {
   renderAllHistory({
     history: repo.history,
     stations: repo.stations,
-    onSelectStation: selectStation,
+    onSelectStation: (no) => selectStation(no),
   });
 }
 
@@ -148,9 +144,9 @@ function selectStation(no, showHistory = true) {
     return;
   }
 
-  
   setSelectedNo(no);
   setActiveView("stations");
+  updateActiveNav("stations");
 
   $("#stationWorkspace").classList.remove("hidden");
   $("#allHistoryPanel").classList.add("hidden");
@@ -170,23 +166,17 @@ function selectStation(no, showHistory = true) {
 
 function showAllHistory() {
   setActiveView("history");
-
   updateActiveNav("history");
 
-  document.querySelector("#stationWorkspace").classList.add("hidden");
+  $("#stationWorkspace").classList.add("hidden");
+  $("#allHistoryPanel").classList.remove("hidden");
 
-  document.querySelector("#allHistoryPanel").classList.remove("hidden");
-
-  document.querySelector("#breadcrumbCurrent").textContent = "전체 이력";
-  document.querySelector("#pageTitle").textContent = "전체 이력";
-  document.querySelector("#pageSubtitle").textContent =
+  $("#breadcrumbCurrent").textContent = "전체 이력";
+  $("#pageTitle").textContent = "전체 이력";
+  $("#pageSubtitle").textContent =
     "모든 충전소의 기록을 최신순으로 검색하고 확인하세요.";
 
-  renderAllHistory({
-  history: repo.history,
-  stations: repo.stations,
-  onSelectStation: (no) => selectStation(no),
-});;
+  refreshAllHistory();
 }
 
 // ------------------------------
@@ -241,9 +231,15 @@ function bindEvents() {
   // 화면 전환
   $("#navStations").addEventListener("click", () => {
     setActiveView("stations");
+    updateActiveNav("stations");
 
     $("#stationWorkspace").classList.remove("hidden");
     $("#allHistoryPanel").classList.add("hidden");
+
+    $("#breadcrumbCurrent").textContent = "충전소 관리";
+    $("#pageTitle").textContent = "충전소 관리";
+    $("#pageSubtitle").textContent =
+      "충전소를 검색하고 선택하면 해당 충전소의 과거 이력을 확인할 수 있습니다.";
 
     renderAll();
   });

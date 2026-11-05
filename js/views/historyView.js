@@ -214,6 +214,7 @@ export function renderDetail({
   renderTimeline({ history, no: station.no });
 }
 
+
 export function renderAllHistory({
   history,
   stations,
@@ -250,22 +251,34 @@ export function renderAllHistory({
           const station = stationByNo(item.no);
 
           return `
-            <div class="all-history-row">
+            <div
+              class="all-history-row"
+              data-history-station="${escapeHtml(item.no)}"
+              role="button"
+              tabindex="0"
+              aria-label="${escapeHtml(
+                `${item.category || "기타"} - ${station?.station_name || item.no} 충전소 이력 보기`
+              )}"
+            >
               <time>${fmtDate(item.date)}</time>
-              <div>
-                <strong>${escapeHtml(item.category || "기타")}</strong>
+
+              <div class="all-history-content">
+                <div class="all-history-heading">
+                  <strong>
+                    ${escapeHtml(item.category || "기타")}
+                  </strong>
+
+                  <span class="all-history-station">
+                    ${escapeHtml(station?.station_name || item.no)}
+                  </span>
+                </div>
+
                 <p>${escapeHtml(item.content)}${
                   item.memo
                     ? `\n메모: ${escapeHtml(item.memo)}`
                     : ""
                 }</p>
               </div>
-              <button
-                class="row-station"
-                data-history-station="${escapeHtml(item.no)}"
-              >
-                ${escapeHtml(station?.station_name || item.no)} ↗
-              </button>
             </div>
           `;
         })
@@ -274,12 +287,22 @@ export function renderAllHistory({
 
   $("#allHistoryList")
     .querySelectorAll("[data-history-station]")
-    .forEach((button) => {
-      button.addEventListener("click", () => {
-        onSelectStation(button.dataset.historyStation);
+    .forEach((row) => {
+      const openStation = () => {
+        onSelectStation(row.dataset.historyStation);
+      };
+
+      row.addEventListener("click", openStation);
+
+      row.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openStation();
+        }
       });
     });
 }
+
 
 export function openHistoryModal({ stations, no }) {
   const select = $("#historyStation");

@@ -99,7 +99,7 @@ button {
 .nav-item.active {
   background: #1b424b;
   color: white;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 
@@ -764,17 +764,67 @@ button {
 .all-history-list {
   margin-top: 15px;
 }
+/* 이력 한 건 */
 .all-history-row {
   display: grid;
-  grid-template-columns: 110px minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 10px;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 20px;
+
+  padding: 20px 8px;
+  border-bottom: 1px solid #e5edf0;
+
+  cursor: pointer;
+  transition: background 0.15s;
 }
+
+/* 첫 번째 이력의 위쪽 구분선 */
+.all-history-row:first-child {
+  border-top: 1px solid #e5edf0;
+}
+
+/* 마우스를 올렸을 때 */
+.all-history-row:hover {
+  background: #f7fafb;
+}
+
+/* 키보드 포커스 */
+.all-history-row:focus-visible {
+  outline: 2px solid #43867e;
+  outline-offset: -2px;
+}
+
+/* 날짜 */
 .all-history-row time {
-  font-size: 10px;
-  color: #84969c;
   padding-top: 2px;
+  color: #71879a;
+  font-size: 12px;
 }
+
+/* 본문 영역 */
+.all-history-content {
+  min-width: 0;
+}
+
+/* 유형 + 충전소명 */
+.all-history-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.all-history-heading strong {
+  color: #172f40;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.all-history-station {
+  color: #43867e;
+  font-size: 12px;
+}
+
 .all-history-row strong {
   font-size: 11px;
 }
@@ -786,30 +836,7 @@ button {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-.all-history-row .row-station {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
 
-  padding: 8px 12px;
-  font-size: 12px;
-  color: #43867e;
-  text-align: center;
-
-  background: #ffffff;
-  border: 1px solid #dce5e9;
-  border-radius: 8px;
-
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.2s, border-color 0.2s;
-}
-
-.all-history-row .row-station:hover {
-  background: #f0f7f6;
-  border-color: #43867e;
-}
 .history-search {
   max-width: 450px;
 }

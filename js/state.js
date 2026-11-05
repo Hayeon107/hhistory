@@ -3,7 +3,7 @@
 const state = {
   selectedNo: null,
   activeFilter: "all",
-  activeView: "stations",
+  activeView: "history",
 };
 
 export function getState() {
@@ -32,4 +32,5 @@ export function getActiveView() {
 
 export function setActiveView(view) {
   state.activeView = view;
+  console.log(view);
 }
