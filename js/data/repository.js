@@ -1,83 +1,105 @@
 
-import { seedStations, seedHistory } from "../../data/seedData.js";
+const API_BASE_URL = "http://127.0.0.1:8000/api";
 
-// const STORAGE_KEY = "hydrogen-station-manager";
-const STORAGE_KEY = "h2-station-demo-v1";
-// 데모 데이터의 조회와 저장을 담당하는 클래스
+// API 오류 응답을 읽기 위한 공통 함수
+async function request(url, options = {}) {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
 
+  if (!response.ok) {
+    let message = `API 요청 실패 (${response.status})`;
 
-//1. 데이터 저장 및 조회
-// 충전소와 이력 데이터를 관리하고 브라우저의 localStorage에 저장
+    try {
+      const errorData = await response.json();
+      message = errorData.detail || message;
+    } catch {
+      // 오류 응답이 JSON 형식이 아닌 경우 기본 메시지 사용
+    }
+
+    throw new Error(message);
+  }
+
+  // 204 No Content 응답 처리
+  if (response.status === 204) {
+    return null;
+  }
+
+  return response.json();
+}
+
 export class DemoRepository {
   constructor() {
-    try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-
-      this.stations = saved?.stations || structuredClone(seedStations);
-      this.history = saved?.history || structuredClone(seedHistory);
-    } catch {
-      // 저장 데이터가 없거나 JSON을 읽을 수 없으면 초기 데이터 사용
-      this.stations = structuredClone(seedStations);
-      this.history = structuredClone(seedHistory);
-    }
+    // main.js에서 사용하는 기존 데이터 인터페이스 유지
+    this.stations = [];
+    this.history = [];
   }
 
-  // 현재 데이터를 브라우저의 localStorage에 저장
-  persist() {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        stations: this.stations,
-        history: this.history,
-      }),
-    );
+  // 앱 시작 시 서버에서 데이터를 가져옴
+  async load() {
+    const [stations, history] = await Promise.all([
+      this.getStations(),
+      this.getHistory(),
+    ]);
+
+    this.stations = stations;
+    this.history = history;
+
+    return {
+      stations: this.stations,
+      history: this.history,
+    };
   }
 
-  // 전체 충전소 조회
+  // 충전소 목록 조회
   async getStations() {
-    return this.stations;
+    return request(`${API_BASE_URL}/stations`);
   }
 
   // 전체 이력 또는 특정 충전소의 이력 조회
   async getHistory(no = null) {
-    return this.history
-      .filter((h) => !no || h.no === no)
-      .sort(
-        (a, b) =>
-          b.date.localeCompare(a.date) ||
-          b.history_id.localeCompare(a.history_id),
-      );
+    const url = new URL(`${API_BASE_URL}/history`);
+
+    if (no != null) {
+      url.searchParams.set("station_no", no);
+    }
+
+    return request(url.toString());
   }
 
-  // 이력 한 건 추가 후 저장
+  // 이력 한 건을 서버 DB에 저장
   async addHistory(record) {
-    this.history.push(record);
-    this.persist();
-    return record;
+    const savedRecord = await request(
+      `${API_BASE_URL}/history`,
+      {
+        method: "POST",
+        body: JSON.stringify(record),
+      },
+    );
+
+    // 서버 저장에 성공한 경우에만 화면 데이터 갱신
+    this.history.push(savedRecord);
+
+    return savedRecord;
   }
 
-  // 여러 이력 추가 후 저장
+  // 엑셀에서 가져온 여러 이력을 서버 DB에 저장
   async importHistory(records) {
-    this.history.push(...records);
-    this.persist();
+    const savedRecords = await request(
+      `${API_BASE_URL}/history/import`,
+      {
+        method: "POST",
+        body: JSON.stringify(records),
+      },
+    );
+
+    // 저장 성공 후 서버의 최신 이력 목록을 다시 조회
+    this.history = await this.getHistory();
+
+    return savedRecords;
   }
 }
-
-async function init() {
-  try {
-    const { seedStations, seedHistory } =
-      await loadExcelData();
-
-    console.log("충전소 목록:", seedStations);
-    console.log("이력 목록:", seedHistory);
-
-    // 이곳에서 기존 화면 렌더링 함수를 호출하면 돼.
-    // renderStations(seedStations);
-    // renderHistory(seedHistory);
-
-  } catch (error) {
-    console.error("데이터 로딩 실패:", error);
-  }
-}
-
-init();

@@ -406,10 +406,24 @@ function bindEvents() {
 // ------------------------------
 // 앱 초기화
 // ------------------------------
+// ------------------------------
+// 앱 초기화
+// ------------------------------
 
-function initApp() {
+async function initApp() {
   bindEvents();
-  renderAll();
+
+  try {
+    await repo.load();
+
+    renderAll();
+
+    console.log("충전소 데이터:", repo.stations);
+    console.log("이력 데이터:", repo.history);
+  } catch (error) {
+    console.error("초기 데이터 로딩 실패:", error);
+    showToast("서버에서 데이터를 불러오지 못했습니다.");
+  }
 }
 
 initApp();
