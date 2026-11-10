@@ -62,3 +62,22 @@ export class DemoRepository {
     this.persist();
   }
 }
+
+async function init() {
+  try {
+    const { seedStations, seedHistory } =
+      await loadExcelData();
+
+    console.log("충전소 목록:", seedStations);
+    console.log("이력 목록:", seedHistory);
+
+    // 이곳에서 기존 화면 렌더링 함수를 호출하면 돼.
+    // renderStations(seedStations);
+    // renderHistory(seedHistory);
+
+  } catch (error) {
+    console.error("데이터 로딩 실패:", error);
+  }
+}
+
+init();

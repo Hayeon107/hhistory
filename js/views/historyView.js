@@ -1,4 +1,3 @@
-
 import { $, escapeHtml, fmtDate, todayISO } from "../utils/helpers.js";
 
 const HISTORY_CATEGORIES = [
@@ -17,19 +16,15 @@ function historyFor(history, no) {
 }
 
 export function renderTimeline({ history, no }) {
-  const query = ($("#detailHistorySearch")?.value || "")
-    .trim()
-    .toLowerCase();
+  const query = ($("#detailHistorySearch")?.value || "").trim().toLowerCase();
 
   const category = $("#detailCategory")?.value || "all";
 
   const filtered = historyFor(history, no).filter((item) => {
-    const matchesCategory =
-      category === "all" || item.category === category;
+    const matchesCategory = category === "all" || item.category === category;
 
     const searchableText =
-      `${item.date} ${item.category} ${item.content} ${item.memo}`
-        .toLowerCase();
+      `${item.date} ${item.category} ${item.content} ${item.memo}`.toLowerCase();
 
     return matchesCategory && searchableText.includes(query);
   });
@@ -104,10 +99,7 @@ export function renderDetail({
     ["충전 방식", station.type],
     ["공급 유형", station.sup_type],
     ["운영 유형", station.con_type],
-    [
-      "충전 압력",
-      station.pressure ? `${station.pressure} bar` : "-",
-    ],
+    ["충전 압력", station.pressure ? `${station.pressure} bar` : "-"],
   ];
 
   pane.innerHTML = `
@@ -134,18 +126,20 @@ export function renderDetail({
       <span>등록 정보 기준</span>
     </div>
 
-    <div class="info-grid">
-      ${infoItems
-        .map(
-          ([label, value]) => `
-            <div class="info-cell">
-              <label>${label}</label>
-              <strong>${escapeHtml(value || "-")}</strong>
-            </div>
+    <table class="station-info-table">
+      <tbody>
+          ${infoItems
+            .map(
+              ([label, value]) => `
+              <tr>
+                  <th>${label}</th>
+                  <td>${value ?? "-"}</td>
+              </tr>
           `,
-        )
-        .join("")}
-    </div>
+            )
+            .join("")}
+      </tbody>
+    </table>
 
     <div class="tabs">
       <button class="tab active">과거 이력</button>
@@ -169,9 +163,9 @@ export function renderDetail({
 
       <select id="detailCategory">
         <option value="all">모든 유형</option>
-        ${HISTORY_CATEGORIES
-          .map((category) => `<option>${category}</option>`)
-          .join("")}
+        ${HISTORY_CATEGORIES.map(
+          (category) => `<option>${category}</option>`,
+        ).join("")}
       </select>
     </div>
 
@@ -214,16 +208,10 @@ export function renderDetail({
   renderTimeline({ history, no: station.no });
 }
 
-
-export function renderAllHistory({
-  history,
-  stations,
-  onSelectStation,
-}) {
+export function renderAllHistory({ history, stations, onSelectStation }) {
   const query = $("#historySearch").value.trim().toLowerCase();
 
-  const stationByNo = (no) =>
-    stations.find((station) => station.no === no);
+  const stationByNo = (no) => stations.find((station) => station.no === no);
 
   const rows = [...history]
     .sort((a, b) => b.date.localeCompare(a.date))
@@ -257,7 +245,7 @@ export function renderAllHistory({
               role="button"
               tabindex="0"
               aria-label="${escapeHtml(
-                `${item.category || "기타"} - ${station?.station_name || item.no} 충전소 이력 보기`
+                `${item.category || "기타"} - ${station?.station_name || item.no} 충전소 이력 보기`,
               )}"
             >
               <time>${fmtDate(item.date)}</time>
@@ -274,9 +262,7 @@ export function renderAllHistory({
                 </div>
 
                 <p>${escapeHtml(item.content)}${
-                  item.memo
-                    ? `\n메모: ${escapeHtml(item.memo)}`
-                    : ""
+                  item.memo ? `\n메모: ${escapeHtml(item.memo)}` : ""
                 }</p>
               </div>
             </div>
@@ -302,7 +288,6 @@ export function renderAllHistory({
       });
     });
 }
-
 
 export function openHistoryModal({ stations, no }) {
   const select = $("#historyStation");
