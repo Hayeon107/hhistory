@@ -1,0 +1,92 @@
+
+// 충전소 기본정보 : [번호(PK), 충전소명, 주소, 업소번호]
+Table station_info {
+  no integer [primary key]
+  station_name varchar [not null]
+  addr varchar [not null]
+  biz_no varchar [not null]
+}
+
+
+//충전소 상세정보 : [번호(PK,FK), 타입, 보조타입 등]
+Table station_meta {
+  no integer [primary key]
+  type varchar [not null]
+  sub_type varchar [not null]
+  con_type varchar [not null]
+  is_lpg int [not null]
+  operation_com varchar
+  juris int [not null]
+  comp_test date [not null]
+  skill_test date [not null]
+  commer_car int [not null]
+  usage int [not null]
+  contruct_com varchar
+  manufacture_com varchar
+  pressure varchar
+  count integer
+  etc varchar
+}
+
+//충전소 연결 정보 : [번호(PK,FK), 모니터링여부, SRP, BLUE, IP, PORT, 메트릭 설치 여부 및 날짜]
+Table station_connection {
+  no integer [primary key]
+  monitoring int [not null]
+  SRP varchar
+  BLUE varchar
+  IP varchar
+  PORT varchar
+  metrix_date DATE
+  is_metrix boolean
+}
+
+//충전소 이력 : [이력아이디(PK), 번호(FK), 내용, 생성날짜]
+Table station_history {
+  history_id integer [primary key]
+  no integer [not null]
+  content varchar
+  created_at timestamp
+}
+
+//가스피아와 이름매핑 정보 : [업소번호(PK,FK), 가스피아이름]
+Table name_mapping {
+  biz_no varchar [primary key]
+  gaspia_name varchar [not null]
+}
+
+//타입매핑 정보 : 모니터링, lpg, 권역, 연구/상용, 
+Table monitoring_map{
+  type_id int [primary key]
+  type varchar
+}
+
+Table juris_map{
+  type_id int [primary key]
+  type varchar
+}
+
+Table commer_car_map{
+  type_id int [primary key]
+  type varchar
+}
+
+Table usage_map{
+  type_id int [primary key]
+  type varchar
+}
+
+Table is_lpg_map{
+  type_id int [primary key]
+  type varchar
+}
+
+
+Ref his_db : station_history.no ?> station_info.no 
+Ref meta_main : station_meta.no - station_info.no 
+Ref: "station_connection"."no" - "station_info"."no"
+Ref: "station_connection"."monitoring" ?> "monitoring_map"."type_id"
+Ref: "station_meta"."juris" ?> "juris_map"."type_id"  
+Ref: "station_meta"."commer_car" ?> "commer_car_map"."type_id"
+Ref: "station_meta"."usage" ?> "usage_map"."type_id"  
+Ref: "station_meta"."is_lpg" ?> "is_lpg_map"."type_id"  
+Ref: "name_mapping"."biz_no" <? "station_info"."biz_no"
