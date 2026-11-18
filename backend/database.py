@@ -16,48 +16,89 @@ def get_connection():
 def create_tables():
     with get_connection() as conn:
         conn.executescript("""
-        CREATE TABLE IF NOT EXISTS hydrogen_db (
+        CREATE TABLE IF NOT EXISTS station_info (
             no INTEGER PRIMARY KEY,
             station_name TEXT,
             addr TEXT,
-            biz_no TEXT,
-            monitoring TEXT,
+            biz_no TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS monitoring_map (
+            type_id INTEGER PRIMARY KEY,
+            type TEXT NOT NULL UNIQUE
+        );
+
+        CREATE TABLE IF NOT EXISTS juris_map (
+            type_id INTEGER PRIMARY KEY,
+            type TEXT NOT NULL UNIQUE
+        );
+
+        CREATE TABLE IF NOT EXISTS commer_car_map (
+            type_id INTEGER PRIMARY KEY,
+            type TEXT NOT NULL UNIQUE
+        );
+
+        CREATE TABLE IF NOT EXISTS usage_map (
+            type_id INTEGER PRIMARY KEY,
+            type TEXT NOT NULL UNIQUE
+        );
+
+        CREATE TABLE IF NOT EXISTS is_lpg_map (
+            type_id INTEGER PRIMARY KEY,
+            type TEXT NOT NULL UNIQUE
+        );
+
+        CREATE TABLE IF NOT EXISTS station_connection (
+            no INTEGER PRIMARY KEY,
+            monitoring INTEGER NOT NULL,
             SRP TEXT,
             BLUE TEXT,
             IP TEXT,
             PORT TEXT,
-            is_metrix TEXT
+            metrix_date TEXT,
+            is_metrix INTEGER,
+            FOREIGN KEY (no)
+                REFERENCES station_info(no),
+            FOREIGN KEY (monitoring)
+                REFERENCES monitoring_map(type_id)
         );
 
-        CREATE TABLE IF NOT EXISTS hydrogen_metadb (
+        CREATE TABLE IF NOT EXISTS station_meta_code (
             no INTEGER PRIMARY KEY,
-            biz_no TEXT,
-            stataion_name TEXT,
             type TEXT,
             sub_type TEXT,
             con_type TEXT,
-            is_lpg TEXT,
+            is_lpg INTEGER NOT NULL,
             operation_com TEXT,
-            addr TEXT,
-            juris TEXT,
+            juris INTEGER NOT NULL,
             comp_test TEXT,
             skill_test TEXT,
-            commer_car TEXT,
-            usage TEXT,
-            contruct_com TEXT,
+            commer_car INTEGER NOT NULL,
+            usage INTEGER NOT NULL,
+            construct_com TEXT,
             manufacture_com TEXT,
             pressure TEXT,
             count INTEGER,
-            etc TEXT
+            etc TEXT,
+            FOREIGN KEY (no)
+                REFERENCES station_info(no),
+            FOREIGN KEY (juris)
+                REFERENCES juris_map(type_id),
+            FOREIGN KEY (commer_car)
+                REFERENCES commer_car_map(type_id),
+            FOREIGN KEY (usage)
+                REFERENCES usage_map(type_id),
+            FOREIGN KEY (is_lpg)
+                REFERENCES is_lpg_map(type_id)
         );
 
-        CREATE TABLE IF NOT EXISTS h_history (
+        CREATE TABLE IF NOT EXISTS station_history (
             history_id INTEGER PRIMARY KEY,
             no INTEGER NOT NULL,
-            biz_no TEXT,
-            content TEXT,
+            comment TEXT,
             created_at TEXT,
-            FOREIGN KEY (no) REFERENCES hydrogen_db(no)
+            FOREIGN KEY (no)
+                REFERENCES station_info(no)
         );
         """)
 

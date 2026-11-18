@@ -1,0 +1,4 @@
+# Excel files
+*.xlsx
+*.xls
+*.ipynb
